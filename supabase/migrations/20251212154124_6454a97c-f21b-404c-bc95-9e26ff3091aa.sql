@@ -190,7 +190,7 @@ CREATE POLICY "Users can create order items" ON public.order_items FOR INSERT TO
 CREATE POLICY "Admins can manage all order items" ON public.order_items FOR ALL TO authenticated USING (public.has_role(auth.uid(), 'admin'));
 
 -- Storage bucket para imagens de produtos
-INSERT INTO storage.buckets (id, name, public) VALUES ('products', 'products', true);
+INSERT INTO storage.buckets (id, name) VALUES ('products', 'products');
 
 CREATE POLICY "Product images are publicly accessible" ON storage.objects FOR SELECT USING (bucket_id = 'products');
 CREATE POLICY "Admins can upload product images" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'products' AND public.has_role(auth.uid(), 'admin'));
