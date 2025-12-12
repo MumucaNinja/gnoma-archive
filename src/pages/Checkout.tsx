@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CreditCard, MapPin, ChevronLeft, CheckCircle } from 'lucide-react';
+import { CreditCard, MapPin, ChevronLeft, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCreateOrder } from '@/hooks/useOrders';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -25,7 +26,7 @@ const addressSchema = z.object({
 
 export default function Checkout() {
   const navigate = useNavigate();
-  const { items, total, clearCart } = useCart();
+  const { items, total } = useCart();
   const { user } = useAuth();
   const createOrder = useCreateOrder();
 
@@ -39,7 +40,7 @@ export default function Checkout() {
     zip_code: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isComplete, setIsComplete] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -53,7 +54,7 @@ export default function Checkout() {
     return null;
   }
 
-  if (items.length === 0 && !isComplete) {
+  if (items.length === 0) {
     navigate('/carrinho');
     return null;
   }
@@ -72,39 +73,41 @@ export default function Checkout() {
       return;
     }
 
+    setIsProcessing(true);
+
     try {
-      await createOrder.mutateAsync(address);
-      setIsComplete(true);
-    } catch (error) {
-      // Error handled by mutation
+      // First create the order in pending state
+      const order = await createOrder.mutateAsync(address);
+      
+      // Then redirect to Stripe checkout
+      const checkoutItems = items.map(item => ({
+        product_name: item.product.name,
+        product_price: item.product.price,
+        product_image: item.product.images?.[0] || null,
+        quantity: item.quantity,
+      }));
+
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          items: checkoutItems,
+          shippingAddress: address,
+          orderId: order.id,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('URL de checkout não recebida');
+      }
+    } catch (error: any) {
+      console.error('Checkout error:', error);
+      toast.error('Erro ao processar checkout: ' + error.message);
+      setIsProcessing(false);
     }
   };
-
-  if (isComplete) {
-    return (
-      <Layout>
-        <div className="container py-16 text-center">
-          <div className="max-w-md mx-auto space-y-6">
-            <div className="p-6 rounded-full bg-primary/10 inline-block animate-pulse-glow">
-              <CheckCircle className="h-16 w-16 text-primary" />
-            </div>
-            <h1 className="font-display text-3xl font-bold">Pedido Realizado!</h1>
-            <p className="text-muted-foreground">
-              Seu pedido foi recebido com sucesso. Você receberá um email com os detalhes.
-            </p>
-            <div className="flex flex-col gap-3">
-              <Button onClick={() => navigate('/minha-conta')}>
-                Ver Meus Pedidos
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/produtos')}>
-                Continuar Comprando
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
@@ -138,6 +141,7 @@ export default function Checkout() {
                         maxLength={9}
                         value={address.zip_code}
                         onChange={e => setAddress({ ...address, zip_code: e.target.value })}
+                        disabled={isProcessing}
                       />
                       {errors.zip_code && <p className="text-sm text-destructive">{errors.zip_code}</p>}
                     </div>
@@ -148,6 +152,7 @@ export default function Checkout() {
                         placeholder="Nome da rua"
                         value={address.street}
                         onChange={e => setAddress({ ...address, street: e.target.value })}
+                        disabled={isProcessing}
                       />
                       {errors.street && <p className="text-sm text-destructive">{errors.street}</p>}
                     </div>
@@ -158,6 +163,7 @@ export default function Checkout() {
                         placeholder="123"
                         value={address.number}
                         onChange={e => setAddress({ ...address, number: e.target.value })}
+                        disabled={isProcessing}
                       />
                       {errors.number && <p className="text-sm text-destructive">{errors.number}</p>}
                     </div>
@@ -168,6 +174,7 @@ export default function Checkout() {
                         placeholder="Apto, sala, etc"
                         value={address.complement}
                         onChange={e => setAddress({ ...address, complement: e.target.value })}
+                        disabled={isProcessing}
                       />
                     </div>
                     <div className="space-y-2">
@@ -177,6 +184,7 @@ export default function Checkout() {
                         placeholder="Bairro"
                         value={address.neighborhood}
                         onChange={e => setAddress({ ...address, neighborhood: e.target.value })}
+                        disabled={isProcessing}
                       />
                       {errors.neighborhood && <p className="text-sm text-destructive">{errors.neighborhood}</p>}
                     </div>
@@ -187,6 +195,7 @@ export default function Checkout() {
                         placeholder="Cidade"
                         value={address.city}
                         onChange={e => setAddress({ ...address, city: e.target.value })}
+                        disabled={isProcessing}
                       />
                       {errors.city && <p className="text-sm text-destructive">{errors.city}</p>}
                     </div>
@@ -198,6 +207,7 @@ export default function Checkout() {
                         maxLength={2}
                         value={address.state}
                         onChange={e => setAddress({ ...address, state: e.target.value.toUpperCase() })}
+                        disabled={isProcessing}
                       />
                       {errors.state && <p className="text-sm text-destructive">{errors.state}</p>}
                     </div>
@@ -215,9 +225,14 @@ export default function Checkout() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">
-                    O pagamento será processado após a confirmação do pedido.
-                    Você receberá as instruções por email.
+                    Você será redirecionado para o Stripe para concluir o pagamento de forma segura.
                   </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                    <svg viewBox="0 0 32 32" className="h-8 w-auto" aria-hidden="true">
+                      <path fill="#6772E5" d="M28.314 7.006c-.65-1.02-1.87-1.67-3.196-1.67h-18.23c-1.33 0-2.55.65-3.2 1.67-.65 1.02-.76 2.29-.29 3.39l5.89 13.83c.46 1.08 1.55 1.78 2.73 1.78h8.03c1.18 0 2.27-.7 2.73-1.78l5.89-13.83c.47-1.1.36-2.37-.29-3.39z"/>
+                    </svg>
+                    Pagamento seguro via Stripe
+                  </div>
                 </CardContent>
               </Card>
 
@@ -225,9 +240,16 @@ export default function Checkout() {
                 type="submit"
                 size="lg"
                 className="w-full glow-primary"
-                disabled={createOrder.isPending}
+                disabled={isProcessing}
               >
-                {createOrder.isPending ? 'Processando...' : 'Confirmar Pedido'}
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processando...
+                  </>
+                ) : (
+                  'Ir para Pagamento'
+                )}
               </Button>
             </form>
           </div>
