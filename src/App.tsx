@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
+import ComboDetail from "./pages/ComboDetail";
 import Cart from "./pages/Cart";
 import Auth from "./pages/Auth";
 import Checkout from "./pages/Checkout";
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/produtos" element={<Products />} />
               <Route path="/categoria/:categorySlug" element={<Products />} />
               <Route path="/produto/:slug" element={<ProductDetail />} />
+              <Route path="/combo/:slug" element={<ComboDetail />} />
               <Route path="/carrinho" element={<Cart />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/checkout" element={<Checkout />} />

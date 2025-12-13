@@ -26,8 +26,17 @@ export interface Product {
   thc_level?: string;
   cbd_level?: string;
   yield_info?: string;
+  is_combo?: boolean;
+  combo_seed_type?: string;
+  combo_quantity?: number;
+  display_order?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface ComboSelection {
+  comboProduct: Product;
+  selectedSeeds: Product[];
 }
 
 export interface CartItem {

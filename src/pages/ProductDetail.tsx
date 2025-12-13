@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingCart, ChevronLeft, Leaf, Clock, Package } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
@@ -41,6 +41,13 @@ export default function ProductDetail() {
       </Layout>
     );
   }
+
+  // Redirect combos to their special page
+  useEffect(() => {
+    if (product?.is_combo) {
+      navigate(`/combo/${product.slug}`, { replace: true });
+    }
+  }, [product, navigate]);
 
   if (!product) {
     return (

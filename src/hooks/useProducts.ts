@@ -13,6 +13,7 @@ export function useProducts(categorySlug?: string) {
           *,
           category:categories(*)
         `)
+        .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
 
       if (categorySlug) {
@@ -86,6 +87,36 @@ export function useCategories() {
       if (error) throw error;
       return data as Category[];
     },
+  });
+}
+
+export function useComboSeeds(categorySlug: string) {
+  return useQuery({
+    queryKey: ['combo-seeds', categorySlug],
+    queryFn: async () => {
+      const { data: category } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('slug', categorySlug)
+        .maybeSingle();
+      
+      if (!category) return [];
+
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*)
+        `)
+        .eq('category_id', category.id)
+        .eq('is_combo', false)
+        .gt('stock', 0)
+        .order('name');
+      
+      if (error) throw error;
+      return data as Product[];
+    },
+    enabled: !!categorySlug,
   });
 }
 
