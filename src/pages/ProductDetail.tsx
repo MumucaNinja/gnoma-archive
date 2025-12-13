@@ -17,6 +17,13 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // Redirect combos to their special page - must be before any returns
+  useEffect(() => {
+    if (product?.is_combo) {
+      navigate(`/combo/${product.slug}`, { replace: true });
+    }
+  }, [product, navigate]);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -41,13 +48,6 @@ export default function ProductDetail() {
       </Layout>
     );
   }
-
-  // Redirect combos to their special page
-  useEffect(() => {
-    if (product?.is_combo) {
-      navigate(`/combo/${product.slug}`, { replace: true });
-    }
-  }, [product, navigate]);
 
   if (!product) {
     return (
