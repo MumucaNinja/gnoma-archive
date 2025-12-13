@@ -24,13 +24,23 @@ export default function Products() {
 
   const currentCategory = categories?.find(c => c.slug === categorySlug);
 
-  // Filter and sort products
+  // Filter and sort products - combos always first
   const filteredProducts = products
     ?.filter(product =>
       product.name.toLowerCase().includes(search.toLowerCase()) ||
       product.description?.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
+      // Combos always come first
+      if (a.is_combo && !b.is_combo) return -1;
+      if (!a.is_combo && b.is_combo) return 1;
+      
+      // If both are combos, sort by display_order
+      if (a.is_combo && b.is_combo) {
+        return (a.display_order || 100) - (b.display_order || 100);
+      }
+      
+      // For non-combo products, apply selected sorting
       switch (sortBy) {
         case 'price-asc':
           return a.price - b.price;
