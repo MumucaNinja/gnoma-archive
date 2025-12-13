@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Filter, SlidersHorizontal } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { ProductGrid } from '@/components/products/ProductGrid';
@@ -102,7 +102,7 @@ export default function Products() {
                           className="w-full justify-start"
                           asChild
                         >
-                          <a href={`/produtos/${cat.slug}`}>{cat.name}</a>
+                          <Link to={`/categoria/${cat.slug}`}>{cat.name}</Link>
                         </Button>
                       ))}
                     </div>
@@ -130,7 +130,7 @@ export default function Products() {
                     className="w-full justify-start"
                     asChild
                   >
-                    <a href="/produtos">Todos</a>
+                    <Link to="/produtos">Todos</Link>
                   </Button>
                   {categories?.map(cat => (
                     <Button
@@ -140,7 +140,7 @@ export default function Products() {
                       className="w-full justify-start"
                       asChild
                     >
-                      <a href={`/produtos/${cat.slug}`}>{cat.name}</a>
+                      <Link to={`/categoria/${cat.slug}`}>{cat.name}</Link>
                     </Button>
                   ))}
                 </div>
