@@ -102,7 +102,7 @@ export default function Products() {
                           className="w-full justify-start"
                           asChild
                         >
-                          <a href={`/categoria/${cat.slug}`}>{cat.name}</a>
+                          <a href={`/produtos/${cat.slug}`}>{cat.name}</a>
                         </Button>
                       ))}
                     </div>
@@ -140,7 +140,7 @@ export default function Products() {
                       className="w-full justify-start"
                       asChild
                     >
-                      <a href={`/categoria/${cat.slug}`}>{cat.name}</a>
+                      <a href={`/produtos/${cat.slug}`}>{cat.name}</a>
                     </Button>
                   ))}
                 </div>
