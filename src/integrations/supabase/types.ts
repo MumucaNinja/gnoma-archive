@@ -204,12 +204,16 @@ export type Database = {
         Row: {
           category_id: string | null
           cbd_level: string | null
+          combo_quantity: number | null
+          combo_seed_type: string | null
           created_at: string
           description: string | null
+          display_order: number | null
           flowering_time: string | null
           genetics: string | null
           id: string
           images: string[] | null
+          is_combo: boolean | null
           is_new: boolean | null
           is_promo: boolean | null
           name: string
@@ -224,12 +228,16 @@ export type Database = {
         Insert: {
           category_id?: string | null
           cbd_level?: string | null
+          combo_quantity?: number | null
+          combo_seed_type?: string | null
           created_at?: string
           description?: string | null
+          display_order?: number | null
           flowering_time?: string | null
           genetics?: string | null
           id?: string
           images?: string[] | null
+          is_combo?: boolean | null
           is_new?: boolean | null
           is_promo?: boolean | null
           name: string
@@ -244,12 +252,16 @@ export type Database = {
         Update: {
           category_id?: string | null
           cbd_level?: string | null
+          combo_quantity?: number | null
+          combo_seed_type?: string | null
           created_at?: string
           description?: string | null
+          display_order?: number | null
           flowering_time?: string | null
           genetics?: string | null
           id?: string
           images?: string[] | null
+          is_combo?: boolean | null
           is_new?: boolean | null
           is_promo?: boolean | null
           name?: string
