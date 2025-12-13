@@ -30,10 +30,7 @@ export function Header() {
   const navLinks = [
     { href: '/', label: 'Início' },
     { href: '/produtos', label: 'Produtos' },
-    ...(categories?.slice(0, 3).map(cat => ({
-      href: `/categoria/${cat.slug}`,
-      label: cat.name,
-    })) || []),
+    { href: '/sobre', label: 'Sobre' },
   ];
 
   return (

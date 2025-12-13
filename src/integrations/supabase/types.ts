@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      about_content: {
+        Row: {
+          content: string
+          id: string
+          image_url: string | null
+          mission: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          values: string | null
+          vision: string | null
+        }
+        Insert: {
+          content?: string
+          id?: string
+          image_url?: string | null
+          mission?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          values?: string | null
+          vision?: string | null
+        }
+        Update: {
+          content?: string
+          id?: string
+          image_url?: string | null
+          mission?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          values?: string | null
+          vision?: string | null
+        }
+        Relationships: []
+      }
       addresses: {
         Row: {
           city: string
